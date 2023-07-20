@@ -60,3 +60,30 @@ export function Ex1_2(s: string, t: string) {
     }
     return count
 }
+
+/**
+ * Return the number of distinct subsequences of s that equal t
+ * @param s 
+ * @param t 
+ * @returns 
+ */
+export function Ex1_3(s:string, t:string) {
+    let arr = new Array(t.length + 1).fill(0)
+    arr = arr.map(() => new Array(s.length + 1).fill(0))
+
+    for(let j=0; j<s.length; j++) {
+        arr[0][j] = 1
+    }
+
+    for(let i=1; i<=t.length; i++) {
+        for(let j=1; j<=s.length; j++) {
+            if(t[i-1] === s[j-1]) {
+                arr[i][j] = arr[i-1][j-1] + arr[i][j-1]
+            } else {
+                arr[i][j] = arr[i][j-1]
+            }
+        }
+    }
+
+    return arr[t.length][s.length]
+}
