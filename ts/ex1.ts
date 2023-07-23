@@ -27,7 +27,12 @@ class Stack {
     pop(): Item {
         return this.data.pop()!
     }
-
+    peek(): Item {
+        return this.data[this.data.length - 1]
+    }
+    size(): number {
+        return this.data.length;
+    }
     empty(): boolean {
         return this.data.length === 0;
     }
