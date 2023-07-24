@@ -10,7 +10,7 @@ import (
 func main() {
 	input := "adbdadeecadeadeccaeaabdabdbcdabddddabcaaadbabaaedeeddeaeebcdeabcaaaeeaeeabcddcebddebeebedaecccbdcbcedbdaeaedcdebeecdaaedaacadbdccabddaddacdddc"
 	startTime := time.Now().UnixMilli()
-	count := ex.Ex1_2(input, "bcddceeeebecbc")
+	count := ex.Ex1Memoization(input, "bcddceeeebecbc")
 	endTime := time.Now().UnixMilli()
 	fmt.Printf("time: %d\n", endTime-startTime)
 	fmt.Printf("count: %d\n", count)

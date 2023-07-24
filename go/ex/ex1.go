@@ -1,7 +1,5 @@
 package ex
 
-import "fmt"
-
 var loopCount int = 0
 
 // Return total number of distinct subsequences of s that are equal to t.
@@ -10,7 +8,7 @@ var loopCount int = 0
 //
 //	ex1("abc", "ab") = 1
 //	ex1("babgbag", "bag") = 5 => ["ba g","bag", "ba    g", "b    ag", "  b  ag"]
-func Ex1(s, t string) int {
+func Ex1Recursive(s, t string) int {
 	loopCount++
 	if len(s) < len(t) {
 		return 0
@@ -29,10 +27,9 @@ func Ex1(s, t string) int {
 	firstT := t[0]
 	count := 0
 	if firstS == firstT {
-		count += Ex1(s[1:], t[1:])
+		count += Ex1Recursive(s[1:], t[1:])
 	}
-	count += Ex1(s[1:], t)
-	fmt.Printf("loopCount: %d\n", loopCount)
+	count += Ex1Recursive(s[1:], t)
 	return count
 }
 
@@ -67,7 +64,11 @@ func (s *Stack) Size() int {
 	return len(s.stack)
 }
 
-func Ex1_2(s, t string) int {
+func Ex1Memoization(s, t string) int {
+	if s == "" && t == "" {
+		return 1
+	}
+
 	sLen := len(s)
 	tLen := len(t)
 	stack := Stack{}
@@ -102,12 +103,15 @@ func Ex1_2(s, t string) int {
 		j++
 	}
 
-	fmt.Printf("loopCount: %d\n", loopCount)
 	return count
 }
 
 // Dynamic programming solution
-func Ex1_3(s string, t string) int {
+func Ex1Dp(s string, t string) int {
+	if s == "" && t == "" {
+		return 1
+	}
+
 	m, n := len(t), len(s)
 
 	// Initialize the dp array
