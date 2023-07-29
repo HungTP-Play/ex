@@ -5,8 +5,8 @@ import (
 )
 
 func main() {
-	fileOut := "book_notes.png"
-	url := "https://files.catbox.moe/67bo9v.png"
-	downloader := implementation.Downloader{}
+	fileOut := "book_notes.jpg"
+	url := "https://files.catbox.moe/em97nz.jpg"
+	downloader := implementation.NewDownloader()
 	downloader.Download(url, fileOut)
 }
