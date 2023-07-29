@@ -1,17 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"time"
-
-	"github.com/HungTP-Play/ex/go/ex"
+	"github.com/HungTP-Play/ex/go/implementation"
 )
 
 func main() {
-	input := "adbdadeecadeadeccaeaabdabdbcdabddddabcaaadbabaaedeeddeaeebcdeabcaaaeeaeeabcddcebddebeebedaecccbdcbcedbdaeaedcdebeecdaaedaacadbdccabddaddacdddc"
-	startTime := time.Now().UnixMilli()
-	count := ex.Ex1Memoization(input, "bcddceeeebecbc")
-	endTime := time.Now().UnixMilli()
-	fmt.Printf("time: %d\n", endTime-startTime)
-	fmt.Printf("count: %d\n", count)
+	fileOut := "book_notes.png"
+	url := "https://files.catbox.moe/67bo9v.png"
+	downloader := implementation.Downloader{}
+	downloader.Download(url, fileOut)
 }

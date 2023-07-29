@@ -73,7 +73,7 @@ func TestEx4DP(t *testing.T) {
 		{"ABCDGH", "AEDFHR", []string{"ADH"}},
 
 		// Case 2: Longer input with multiple possible subsequences
-		{"AGGTAB", "GXATXAYB", []string{"GTAB"}},
+		{"AGGTAB", "GXATXAYB", []string{"GTAB", "ATAB"}},
 
 		// Case 3: Input with no common characters
 		{"ABCDEF", "GHIJKL", []string{""}},
