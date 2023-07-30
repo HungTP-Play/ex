@@ -1,59 +1,125 @@
+/**
+ * function to determine the chunk size to download.
+ * 
+ * @param size The size of the file.
+ */
+export type ChunkSizeDeterminer = (size: number) => number;
 
-import fs from 'fs/promises';
-import fetch from 'node-fetch';
+/**
+ * Function to determine the number of parts to download.
+ * 
+ * @param size The size of the file.
+ */
+export type PartDeterminer = (size: number) => number;
 
-function getChunkSize(size: number): number {
-    if (size < 1 * 1024 * 1024) return size;
-    if (size < 10 * 1024 * 1024) return 1 * 1024 * 1024;
-    if (size < 100 * 1024 * 1024) return 5 * 1024 * 1024;
-    if (size < 1024 * 1024 * 1024) return 10 * 1024 * 1024;
-    return 20 * 1024 * 1024;
+/**
+ * Config for the downloader.
+ */
+export type DownloaderConfig = {
+    /**
+     * The maximum number of retries for a chunk.
+     */
+    maxRetries?: number;
+
+    /**
+     * The maximum number of chunks to download at once.
+     */
+    maxChunkSize?: number;
+
+    /**
+     * The number of chunks to download at once.
+     */
+    concurrency: number;
+
+    /**
+     * The function to determine the number of parts to download.
+     */
+    chunkSizeDeterminer?: ChunkSizeDeterminer;
+
+    /**
+     * The function to determine the chunk size to download.
+     */
+    partDeterminer?: PartDeterminer;
+
+    /**
+     * The actual chunk size to download.
+     */
+    chunkSize: number;
+};
+
+
+export interface WriteAt {
+    WriteAt(bytes: Uint8Array, offset: number): Promise<number>;
 }
 
-function getNumberOfPart(size: number): number {
-    if (size < 1 * 1024 * 1024) return 1;
-    if (size < 10 * 1024 * 1024) return 4;
-    if (size < 100 * 1024 * 1024) return 8;
-    if (size < 1024 * 1024 * 1024) return 16;
+export enum SizeUnit {
+    B = 1,
+    KB = 1024,
+    MB = 1024 * 1024,
+    GB = 1024 * 1024 * 1024
+}
+
+const defaultPartDeterminer: PartDeterminer = (size: number) => {
+    if (size < SizeUnit.MB) {
+        return 1;
+    }
+
+    if (size < 10 * SizeUnit.GB) {
+        return 4;
+    }
+
+    if (size < 100 * SizeUnit.GB) {
+        return 16;
+    }
+
     return 32;
 }
 
-async function getFileSize(url:string): Promise<number> {
-    const response = await fetch(url, {
-        method: 'HEAD'
-    });
-    const size = response.headers.get('Content-Length');
-    return Number(size);
+const defaultConfig: DownloaderConfig = {
+    maxRetries: 5,
+    maxChunkSize: SizeUnit.MB,
+    concurrency: 4,
+    partDeterminer: defaultPartDeterminer,
+    chunkSize: 0
 }
 
-async function downloadPart(url:string, outPath: string, start: number, size: number): Promise<void> {
-    const response = await fetch(url, {
-        headers: {
-            Range: `bytes=${start}-${start + size - 1}`
-        }
-    });
-    const buffer = await response.arrayBuffer();
-    await fs.writeFile(outPath, Buffer.from(buffer));
-}
+export class downloadChunk {
+    start: number;
+    end: number;
+    size: number;
+    cur: number;
+    writer: WriteAt;
 
-async function dowloadFile(url:string, outPath: string): Promise<void>{
-    const fileSize = await getFileSize(url);
-    const chunkSize = getChunkSize(fileSize);
-    const numParts = Math.ceil(fileSize / chunkSize);
-
-    // For using fixed number of parts
-    // const numParts = getNumberOfPart(fileSize);
-    // const chunkSize = Math.ceil(fileSize / numParts);
-
-    const promises = [];
-
-    for (let i = 0; i < numParts; i++) {
-        const start = i * chunkSize;
-        const end = Math.min((i + 1) * chunkSize, fileSize);
-        const partSize = end - start;
-        const partPath = `${outPath}.${i}`;
-        promises.push(downloadPart(url, partPath, start, partSize));
+    constructor(start: number, end: number, size: number) {
+        this.start = start;
+        this.end = end;
+        this.size = size;
+        this.cur = start;
     }
 
-    await Promise.all(promises);
+    async write(bytes: Uint8Array): Promise<number> {
+        if (this.cur + bytes.length > this.end) {
+            throw new Error('Invalid write');
+        }
+
+        const byteWrote =  await this.writer.WriteAt(bytes, this.start+this.cur);
+        this.cur += byteWrote;
+        return byteWrote;
+    }
+
+    byteRage(): string {
+        return `bytes=${this.start}-${this.end}`;
+    }
+}
+
+class downloader {
+    constructor(private config: DownloaderConfig) { }
+}
+
+export class Downloader {
+    private downloader: downloader;
+    constructor(private config: DownloaderConfig) {
+        this.config = Object.assign({}, defaultConfig, config);
+        this.downloader = new downloader(this.config);
+    }
 }
