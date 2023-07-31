@@ -4,7 +4,7 @@ type Item = {
 }
 
 function ex3KnapsackRecursive(items: Item[], capacity: number): number {
-    const knapsack = (items: Item[], capacity: number, currentWeight: number, currentValue: number, index: number, selectedItems: boolean[]): number => {
+    const knapsack = (items: Item[], capacity: number, currentWeight: number, currentValue: number, index: number): number => {
         if (currentWeight > capacity) {
             return 0;
         }
@@ -15,17 +15,17 @@ function ex3KnapsackRecursive(items: Item[], capacity: number): number {
 
         // With current item
         selectedItems[index] = true;
-        const withCurrentItem: number = knapsack(items, capacity, currentWeight + items[index].weight, currentValue + items[index].value, index + 1, selectedItems);
+        const withCurrentItem: number = knapsack(items, capacity, currentWeight + items[index].weight, currentValue + items[index].value, index + 1);
 
         // Without current item
         selectedItems[index] = false;
-        const withoutCurrentItem: number = knapsack(items, capacity, currentWeight, currentValue, index + 1, selectedItems);
+        const withoutCurrentItem: number = knapsack(items, capacity, currentWeight, currentValue, index + 1);
 
         return Math.max(withCurrentItem, withoutCurrentItem);
     }
 
     const selectedItems = new Array(items.length).fill(false);
-    return knapsack(items, capacity, 0, 0, 0, selectedItems);
+    return knapsack(items, capacity, 0, 0, 0);
 }
 
 function ex3KnapsackDynamic(items: Item[], capacity: number): number {
@@ -51,18 +51,16 @@ function ex3KnapsackDynamic(items: Item[], capacity: number): number {
     return knapsack[itemCount][capacity];
 }
 
-function main() {
-    const items = [
-        { weight: 1, value: 1 },
-        { weight: 2, value: 6 },
-        { weight: 3, value: 10 },
-        { weight: 5, value: 16 }
+function ex3main(){
+    const items: Item[] = [
+        {weight: 2, value: 6},
+        {weight: 2, value: 10},
+        {weight: 3, value: 12},
     ];
+    const capacity = 5;
 
-    const capacity = 7;
-    const maxValue = ex3KnapsackDynamic(items, capacity);
-    console.log(`Max value: ${maxValue}`);
+    console.log(ex3KnapsackRecursive(items, capacity));
+    console.log(ex3KnapsackDynamic(items, capacity));
 }
 
-
-main();
+ex3main();
